@@ -40,13 +40,17 @@ The features are:
 - Add a Book
 - Update a Book
 
-📘 Task 1: Implement the following User Story with tests.
+📘 Task 1: Implement the following User Story with tests. *Completed*
 
-`User Story: As a user, I want to use the Book Manager API to delete a book using its ID`
+User Story: As a user, I want to use the Book Manager API to delete a book using its ID`
+
+Solution:
+Added a method with mapping for the http 'delete' request. The method calls the service class to delete
+the book by id, using the repository class.  
 
 
 📘 Extension Task: Oh no! 😭 We've only covered the happy paths in the solution, can you figure out a way
-to add in exception handling to the project? 
+to add in exception handling to the project? *Completed* 
 
 - Clue 1: What if someone wants to add a book with an ID for a book that already exists? How do we handle this gracefully?
 
@@ -54,3 +58,11 @@ to add in exception handling to the project?
 - Clue 2: What if someone wants to find a book by an ID that doesn't yet exist? 
   How can we improve the API by handling errors gracefully and show a helpful message to the client?
   
+Solution:
+Before adding a book , the service method now checks if the book by that id already exists. If it does, an exception
+is thrown with a message explaining the cause.
+
+If looking for a book that does not exist then an exception is thrown with cause. 
+
+To allow the exception message to be passed on to the Json object the following property needs
+to be set:  server.error.include-message=always
