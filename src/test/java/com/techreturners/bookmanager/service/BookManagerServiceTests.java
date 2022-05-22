@@ -1,10 +1,13 @@
 package com.techreturners.bookmanager.service;
 
+import com.techreturners.bookmanager.exception.BookAlreadyExistsException;
+import com.techreturners.bookmanager.exception.BookNotFoundException;
 import com.techreturners.bookmanager.model.Book;
 import com.techreturners.bookmanager.model.Genre;
 
 import com.techreturners.bookmanager.repository.BookManagerRepository;
 import org.junit.jupiter.api.Test;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
@@ -24,6 +28,9 @@ public class BookManagerServiceTests {
 
     @InjectMocks
     private BookManagerServiceImpl bookManagerServiceImpl;
+
+  //  @Rule
+  //  public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void testGetAllBooksReturnsListOfBooks() {
@@ -54,6 +61,22 @@ public class BookManagerServiceTests {
     }
 
     @Test
+    public void testAddExistingBook() {
+
+        Exception exception = assertThrows(BookAlreadyExistsException.class, () -> {
+
+            var book = new Book(4L, "Book Four", "This is the description for Book Four", "Person Four", Genre.Fantasy);
+
+            when(mockBookManagerRepository.findById(book.getId())).thenReturn(Optional.of(book));
+            when(mockBookManagerRepository.save(book)).thenReturn(book);
+
+            Book actualResult = bookManagerServiceImpl.insertBook(book);
+        });
+
+
+    }
+
+    @Test
     public void testGetBookById() {
 
         Long bookId = 5L;
@@ -79,6 +102,19 @@ public class BookManagerServiceTests {
         bookManagerServiceImpl.updateBookById(bookId, book);
 
         verify(mockBookManagerRepository, times(1)).save(book);
+    }
+
+    //Error checking for a Updating book that does not exist.
+    @Test
+    public void testUpdateBookByIdFailsWhenIdDoesNotExist() {
+        Exception exception = assertThrows(BookNotFoundException.class, () -> {
+            Long bookId = 5L;
+            var book = new Book(5L, "Book Five", "This is the description for Book Five", "Person Five", Genre.Fantasy);
+
+            bookManagerServiceImpl.updateBookById(bookId, book);
+    
+            verify(mockBookManagerRepository, times(1)).save(book);
+        });
     }
 
     //User Story - delete book by id
